@@ -1,4 +1,6 @@
 import scrapy
+from scrapy.selector import Selector
+# from scrapy.http.request import Request
 
 class ProductsSpider(scrapy.Spider):
     name = "products"
@@ -11,16 +13,19 @@ class ProductsSpider(scrapy.Spider):
 
     def parse(self, response):
         for product in response.css('ul.ProductList li'):
-            desc_url = product.css('div.ProductDetails a::attr(href)').extract_first();
-            yield {
+            desc_url = product.css('div.ProductDetails a::attr(href)').extract_first()
+
+            data = {
                 'product_name': product.css('div.ProductDetails a::text').extract_first(),
                 'price': product.css('em::text').extract_first(),
-                'product_url': product.css('div.ProductImage a::attr(href)').extract(),
-                'description': response.follow(desc_url, callback=self.parseDescription)
-
-            }
+                'product_url': product.css('div.ProductImage a::attr(href)').extract()
+                }
+            request = scrapy.Request(desc_url, callback=self.parseDescription,)
+            request.meta['item']= data
+            yield request
 
     def parseDescription(self, response):
-        #print response
-        item = response.css('span::text').extract()
-        yield item
+        description = response.css('span.prod-descr::text').extract_first()
+        data = response.meta['item']
+        data['description']=description
+        yield data
