@@ -3,7 +3,7 @@ from scrapy.selector import Selector
 # from scrapy.http.request import Request
 
 class ProductsSpider(scrapy.Spider):
-    name = "products"
+    name = "productsspider"
     start_urls = [
         'https://www.liveyoursport.com/heart-rate-monitors-1/',
         'https://www.liveyoursport.com/heart-rate-monitors-1/?page=2',
