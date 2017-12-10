@@ -6,12 +6,10 @@ class ProductsSpider(scrapy.Spider):
     name = "productsspider"
     start_urls = [
         'https://www.liveyoursport.com/heart-rate-monitors-1/',
-        'https://www.liveyoursport.com/heart-rate-monitors-1/?page=2',
-        'https://www.liveyoursport.com/heart-rate-monitors-1/?page=3',
-        'https://www.liveyoursport.com/heart-rate-monitors-1/?page=4',
     ]
 
     def parse(self, response):
+        next_url = response.css('div.Next a::attr(href)').extract_first()
         for product in response.css('ul.ProductList li'):
             desc_url = product.css('div.ProductDetails a::attr(href)').extract_first()
 
@@ -23,6 +21,8 @@ class ProductsSpider(scrapy.Spider):
             request = scrapy.Request(desc_url, callback=self.parseDescription,)
             request.meta['item']= data
             yield request
+        if next_url:
+            yield scrapy.Request(next_url, callback=self.parse)
 
     def parseDescription(self, response):
         description = response.css('span.prod-descr::text').extract_first()
